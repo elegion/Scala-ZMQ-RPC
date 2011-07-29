@@ -24,7 +24,7 @@ object Util {
     endpoint plug socket
     val handlerResult = handler(socket)
     socket.close()
-    result
+    handlerResult
   }
 
   def rep(context: Context, endpoint: Endpoint)(handler: Socket => Any) = plugSocket(REP)(context, endpoint)(handler)

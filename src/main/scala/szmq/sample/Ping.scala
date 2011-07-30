@@ -4,6 +4,8 @@ import szmq.Util._
 import szmq.BindTo._
 import org.zeromq.ZMQ._
 import szmq.ConnectTo
+import org.msgpack.ScalaMessagePack
+import szmq.rpc.{Reply, MethodCall}
 
 /**
  * Author: Yuri Buyanov
@@ -13,11 +15,10 @@ import szmq.ConnectTo
 object Ping extends Application {
   inContext() { context: Context =>
     req(context, ConnectTo("tcp://localhost:9999")) { s: Socket =>
-      val requestString = "Ping"
-      println("Sending "+requestString)
-      s.send(requestString.getBytes, 0)
-      println("Getting response "+requestString)
-      val response = new String(s.recv(0))
+      val request = MethodCall("Ping", "")
+      s.send(ScalaMessagePack.pack(request), 0)
+      println("Getting response "+request)
+      val response = ScalaMessagePack.unpack[Reply](s.recv(0))
       println("Got response "+response)
     }
   }

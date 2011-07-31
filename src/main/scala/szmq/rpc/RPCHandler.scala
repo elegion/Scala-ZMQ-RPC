@@ -13,8 +13,8 @@ object ErrorResponse {
   def malformedCall = Reply("", "Malformed method call")
 }
 
-abstract class RPCHandler {
-  type DispatchPF = PartialFunction[MethodCall, () => Reply]
+abstract class RPCHandler { self: Serialization =>
+  type DispatchPF = PartialFunction[MethodCall, Reply]
   @volatile private var _dispatch: List[DispatchPF] = dispatchUnhandled::Nil
   def dispatchUnhandled: DispatchPF = {
     case call: MethodCall => { () => ErrorResponse.unknownMethod(call) }
@@ -28,9 +28,9 @@ abstract class RPCHandler {
     while(true) {
       val data = socket.recv(0)
       try {
-        val call = ScalaMessagePack.unpack[MethodCall](data)
+        val call = deserialize[MethodCall](data)
         val response = _dispatch.find(_.isDefinedAt(call)).get.apply(call)
-        val responseData = ScalaMessagePack.pack(response)
+        val responseData = serialize(response)
         socket.send(responseData, 0)
       } catch {
         case e: UnpackException => ErrorResponse.malformedCall

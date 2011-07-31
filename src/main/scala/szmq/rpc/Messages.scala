@@ -17,5 +17,5 @@ case class MethodCall(
 
 case class Reply(
   value: Any,
-  error: String
+  error: Option[String] = None
 )

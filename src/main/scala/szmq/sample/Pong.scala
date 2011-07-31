@@ -3,7 +3,7 @@ package szmq.sample
 import szmq.Util._
 import szmq.BindTo
 import org.zeromq.ZMQ._
-import szmq.rpc.{Reply, MethodCall, RPCHandler}
+import szmq.rpc.{BSONSerializer, Reply, MethodCall, RPCHandler}
 
 /**
  * Author: Yuri Buyanov
@@ -11,9 +11,9 @@ import szmq.rpc.{Reply, MethodCall, RPCHandler}
  */
 
 object Pong extends Application {
-  object PongServer extends  RPCHandler {
+  object PongServer extends RPCHandler with BSONSerializer {
     serve {
-      case MethodCall("Ping", _) => { () => Reply("Pong", "") }
+      case MethodCall("Ping", _) => { Reply("Pong") }
     }
   }
 

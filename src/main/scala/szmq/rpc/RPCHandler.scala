@@ -1,7 +1,6 @@
 package szmq.rpc
 
 import org.zeromq.ZMQ.Socket
-import org.msgpack.{UnpackException, ScalaMessagePack}
 
 /**
  * Author: Yuri Buyanov
@@ -9,15 +8,15 @@ import org.msgpack.{UnpackException, ScalaMessagePack}
  */
 
 object ErrorResponse {
-  def unknownMethod(call: MethodCall) = Reply("", "Unknown method: "+call.name+" for this args")
-  def malformedCall = Reply("", "Malformed method call")
+  def unknownMethod(call: MethodCall) = Reply("", Some("Unknown method: "+call.name+" for this args"))
+  def malformedCall = Reply("", Some("Malformed method call"))
 }
 
-abstract class RPCHandler { self: Serialization =>
+abstract class RPCHandler { self: Serializer =>
   type DispatchPF = PartialFunction[MethodCall, Reply]
   @volatile private var _dispatch: List[DispatchPF] = dispatchUnhandled::Nil
   def dispatchUnhandled: DispatchPF = {
-    case call: MethodCall => { () => ErrorResponse.unknownMethod(call) }
+    case call: MethodCall => { ErrorResponse.unknownMethod(call) }
   }
   def serve(handler: DispatchPF) {
     _dispatch ::= handler
@@ -33,7 +32,7 @@ abstract class RPCHandler { self: Serialization =>
         val responseData = serialize(response)
         socket.send(responseData, 0)
       } catch {
-        case e: UnpackException => ErrorResponse.malformedCall
+        case e: Exception => ErrorResponse.malformedCall
       }
     }
 

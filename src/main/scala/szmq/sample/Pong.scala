@@ -14,6 +14,7 @@ object Pong extends Application {
   object PongServer extends RPCHandler with BSONSerializer {
     serve {
       case MethodCall("Ping", _) => { Reply("Pong") }
+      case MethodCall("Args", List(a, b)) => { Reply("Args: %s, %s" format (a, b)) }
     }
   }
 

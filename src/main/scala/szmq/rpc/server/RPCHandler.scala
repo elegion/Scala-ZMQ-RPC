@@ -1,5 +1,6 @@
-package szmq.rpc
+package szmq.rpc.server
 
+import szmq.rpc._
 import org.zeromq.ZMQ.Socket
 
 /**

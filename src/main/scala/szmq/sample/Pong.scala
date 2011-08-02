@@ -1,8 +1,8 @@
 package szmq.sample
 
 import szmq._
-import   Util._
 import   rpc._
+import   rpc.server._
 
 /**
  * Author: Yuri Buyanov

@@ -1,4 +1,4 @@
-package szmq
+package szmq.rpc
 
 /**
  * Author: Yuri Buyanov

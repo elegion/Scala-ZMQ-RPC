@@ -1,4 +1,4 @@
-package szmq.rpc
+package szmq.rpc.server
 
 import szmq._
 import  Util._

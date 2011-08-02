@@ -1,9 +1,8 @@
-package szmq.client
+package szmq.rpc.client
 
-import org.zeromq.ZMQ
-import szmq.{RPCError, Endpoint}
-import szmq.rpc.{Serializer, Reply, BSONSerializer, MethodCall}
-import org.zeromq.ZMQ.{Socket, Context}
+import szmq._
+import   rpc._
+import org.zeromq.ZMQ.Socket
 
 /**
  * Author: Yuri Buyanov

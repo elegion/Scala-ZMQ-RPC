@@ -19,13 +19,13 @@ class RPCQueue(
   def backendEPUri = "inproc://"+id
   val backendEP = BindTo(backendEPUri)
   val workerEP = ConnectTo(backendEPUri)
+  var workerSet = scala.collection.mutable.Set.empty[RPCHandler]
 
   def start(frontendEP: Endpoint) = {
     withContext(ctx) { context: Context =>
       thread {
         router(context, frontendEP) { frontend =>
           dealer(context, backendEP) { backend =>
-            println("starting queue")
             new ZMQQueue(context, frontend, backend).run()
           }
         }
@@ -35,6 +35,7 @@ class RPCQueue(
   }
 
   def addWorker(handler: RPCHandler) {
+    workerSet += handler
     thread {
       rep(ctx, workerEP) { s: Socket =>
         handler.handleSocket(s)

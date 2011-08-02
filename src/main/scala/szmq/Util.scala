@@ -20,7 +20,7 @@ object Util {
     withContext(zmqcontext)(block)
   }
 
-  private def plugSocket(sockType: Int)(context: Context, endpoint: Endpoint)(handler: Socket => Any) = {
+  private def inSocket(sockType: Int)(context: Context, endpoint: Endpoint)(handler: Socket => Any) = {
     val socket = context.socket(sockType)
     endpoint plug socket
     val handlerResult = handler(socket)
@@ -28,10 +28,10 @@ object Util {
     handlerResult
   }
 
-  def rep(context: Context, endpoint: Endpoint)(handler: Socket => Any) = plugSocket(REP)(context, endpoint)(handler)
-  def req(context: Context, endpoint: Endpoint)(handler: Socket => Any) = plugSocket(REQ)(context, endpoint)(handler)
-  def router(context: Context, endpoint: Endpoint)(handler: Socket => Any) = plugSocket(XREP)(context, endpoint)(handler)
-  def dealer(context: Context, endpoint: Endpoint)(handler: Socket => Any) = plugSocket(XREQ)(context, endpoint)(handler)
+  def rep(context: Context, endpoint: Endpoint)(handler: Socket => Any) = inSocket(REP)(context, endpoint)(handler)
+  def req(context: Context, endpoint: Endpoint)(handler: Socket => Any) = inSocket(REQ)(context, endpoint)(handler)
+  def router(context: Context, endpoint: Endpoint)(handler: Socket => Any) = inSocket(XREP)(context, endpoint)(handler)
+  def dealer(context: Context, endpoint: Endpoint)(handler: Socket => Any) = inSocket(XREQ)(context, endpoint)(handler)
 
   def repLoop(context: Context, endpoint: Endpoint)(handler: Socket => Any) {
     val loopHandler = { s: Socket => while (true) { handler(s) }}
@@ -43,7 +43,4 @@ object Util {
       override def run() { block }
     }.start()
   }
-
-
-
 }

@@ -7,26 +7,18 @@ import org.zeromq.ZMQ.Socket
  * Date: 7/29/11 7:02 PM
  */
 
-abstract sealed class Endpoint {
-  def plug(s: Socket)
-}
-
-object BindTo {
-  def apply(address: String): BindTo = BindTo(Seq(address))
-}
-
-case class BindTo(addresses: Traversable[String]) extends Endpoint {
+abstract sealed class Endpoint(addresses: String*) {
   def plug(s: Socket) {
-    addresses foreach (s bind _)
+    addresses foreach (_plug(s, _))
   }
+
+  def _plug(s: Socket, address: String)
 }
 
-object ConnectTo {
-  def apply(address: String): ConnectTo = ConnectTo(Seq(address))
+case class BindTo(addresses: String*) extends Endpoint(addresses: _*) {
+  def _plug(s: Socket, address: String) { s bind address }
 }
 
-case class ConnectTo(addresses: Traversable[String]) extends Endpoint {
-  def plug(s: Socket) {
-    addresses foreach (s connect _)
-  }
+case class ConnectTo(addresses: String*) extends Endpoint(addresses: _*) {
+  def _plug(s: Socket, address: String) { s connect address  }
 }

@@ -6,6 +6,9 @@ import org.zeromq.ZMQ._
 import szmq.ConnectTo
 import szmq.rpc.{BSONSerializer, Serializer, Reply, MethodCall}
 import szmq.client.Client
+import java.lang.Thread
+
+
 
 //import org.msgpack.ScalaMessagePack
 /**
@@ -13,21 +16,32 @@ import szmq.client.Client
  * Date: 7/29/11 10:14 PM
  */
 
-object Ping extends Application {
-  inContext() { context: Context =>
-    req(context, ConnectTo("tcp://localhost:9999")) { socket =>
-      println("Creating client")
-      val client = new Client(socket) with BSONSerializer
+object Ping {
+  def main(args: Array[String]) {
+    inContext() { context: Context =>
+      val clientsNum = 200
+      val count = args.headOption map (_.toInt) getOrElse (10)
 
-      println("Calling ping")
-      val response = client.callMethod("Ping", Nil)
-      println("Got response "+response)
+      1 to clientsNum foreach { clientNum =>
+        new Thread() {
+          override def run() {
+            val start = System currentTimeMillis()
+            req(context, ConnectTo("tcp://localhost:9999")) { socket =>
+              println("Creating client")
+              val client = new Client(socket) with BSONSerializer
+              1 to count foreach { n =>
+                println("Calling args "+n)
+                val response2 = client.callMethod("Args", List("client #"+clientNum, n))
+                println("Got response "+response2)
+                Thread sleep 1000
+              }
+            }
+            println("done in "+(System.currentTimeMillis() - start) + "ms")
 
-      println("Calling args")
-      val response2 = client.callMethod("Args", List(3, 2.8))
-      println("Got response "+response2)
-
+          }
+        }.start()
+        Thread sleep 1000
+      }
     }
-
   }
 }

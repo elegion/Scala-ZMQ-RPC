@@ -1,9 +1,11 @@
 package szmq.sample
 
 import szmq.Util._
-import szmq.BindTo
 import org.zeromq.ZMQ._
 import szmq.rpc.{BSONSerializer, Reply, MethodCall, RPCHandler}
+import szmq.{ConnectTo, BindTo}
+import org.zeromq.{ZMQQueue, ZMQ}
+import java.util.Queue
 
 /**
  * Author: Yuri Buyanov
@@ -11,16 +13,43 @@ import szmq.rpc.{BSONSerializer, Reply, MethodCall, RPCHandler}
  */
 
 object Pong extends Application {
-  object PongServer extends RPCHandler with BSONSerializer {
+  val workerNum = 50
+
+  class PongServer(val n: Int) extends  RPCHandler with BSONSerializer {
     serve {
       case MethodCall("Ping", _) => { Reply("Pong") }
-      case MethodCall("Args", List(a, b)) => { Reply("Args: %s, %s" format (a, b)) }
+      case MethodCall("Args", List(a, b)) => {
+        println("#"+n+" Got args: "+a+", "+b)
+        Thread.sleep(1000)
+        println("#"+n+" replying: "+a+", "+b)
+        Reply("Args: %s, %s" format (a, b))
+      }
     }
   }
 
   inContext() { context: Context =>
-    rep(context, BindTo("tcp://*:9999")) { s: Socket =>
-      PongServer.handleSocket(s)
+    new Thread() {
+      override def run() {
+        router(context, BindTo("tcp://*:9999")) { frontend =>
+          dealer(context, BindTo("tcp://*:9998")) { backend =>
+            println("starting queue")
+            new ZMQQueue(context, frontend, backend).run()
+          }
+        }
+      }
+    }.start()
+
+    1 to workerNum foreach {n =>
+      new Thread() {
+        override def run() {
+          rep(context, ConnectTo("tcp://localhost:9998")) { s: Socket =>
+            new PongServer(n).handleSocket(s)
+          }
+        }
+      }.start()
     }
+
+
+
   }
 }

@@ -29,6 +29,8 @@ object Util {
 
   def rep(context: Context, endpoint: Endpoint)(handler: Socket => Any) = plugSocket(REP)(context, endpoint)(handler)
   def req(context: Context, endpoint: Endpoint)(handler: Socket => Any) = plugSocket(REQ)(context, endpoint)(handler)
+  def router(context: Context, endpoint: Endpoint)(handler: Socket => Any) = plugSocket(XREP)(context, endpoint)(handler)
+  def dealer(context: Context, endpoint: Endpoint)(handler: Socket => Any) = plugSocket(XREQ)(context, endpoint)(handler)
 
 
   def repLoop(context: Context, endpoint: Endpoint)(handler: Socket => Any) {

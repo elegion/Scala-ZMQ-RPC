@@ -1,11 +1,8 @@
 package szmq.sample
 
-import szmq.Util._
-import org.zeromq.ZMQ._
-import szmq.{ConnectTo, BindTo}
-import org.zeromq.{ZMQQueue, ZMQ}
-import java.util.Queue
-import szmq.rpc._
+import szmq._
+import   Util._
+import   rpc._
 
 /**
  * Author: Yuri Buyanov
@@ -19,9 +16,8 @@ object Pong extends Application {
     serve {
       case MethodCall("Ping", _) => { Reply("Pong") }
       case MethodCall("Args", List(a, b)) => {
-        println("#"+n+" Got args: "+a+", "+b)
+        println("# %s Got args: %s, %s" format (n, a, b))
         Thread.sleep(1000)
-        println("#"+n+" replying: "+a+", "+b)
         Reply("Args: %s, %s" format (a, b))
       }
     }

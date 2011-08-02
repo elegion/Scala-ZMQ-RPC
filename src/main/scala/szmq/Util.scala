@@ -3,6 +3,7 @@ package szmq
 import org.zeromq._
 import org.zeromq.ZMQ._
 import szmq.DefaultConfig
+import java.lang.Thread
 
 /**
  * Author: Yuri Buyanov
@@ -32,11 +33,17 @@ object Util {
   def router(context: Context, endpoint: Endpoint)(handler: Socket => Any) = plugSocket(XREP)(context, endpoint)(handler)
   def dealer(context: Context, endpoint: Endpoint)(handler: Socket => Any) = plugSocket(XREQ)(context, endpoint)(handler)
 
-
   def repLoop(context: Context, endpoint: Endpoint)(handler: Socket => Any) {
     val loopHandler = { s: Socket => while (true) { handler(s) }}
     rep(context,endpoint)(loopHandler)
   }
+
+  def thread(block: => Any) {
+    new Thread() {
+      override def run() { block }
+    }.start()
+  }
+
 
 
 }

@@ -15,7 +15,6 @@ abstract class Client(socket: Socket) extends Serializer {
     val mc = MethodCall(name, args)
     socket.send(serialize(mc), 0)
     val reply = deserialize[Reply](socket.recv(0))
-    println("reply: "+reply)
     reply.error map {err: String => throw new RPCError(err)} getOrElse(reply.value)
   }
 

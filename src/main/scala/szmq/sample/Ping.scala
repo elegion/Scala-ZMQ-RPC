@@ -8,9 +8,6 @@ import  szmq.rpc.client.Client
 
 import java.lang.Thread
 
-
-
-//import org.msgpack.ScalaMessagePack
 /**
  * Author: Yuri Buyanov
  * Date: 7/29/11 10:14 PM
@@ -30,7 +27,7 @@ object Ping {
             val client = new Client(socket) with BSONSerializer
             1 to count foreach { n =>
               println("Calling args "+n)
-              val response2 = client.callMethod("Args", List("client #"+clientNum, n))
+              val response2 = client.callMethod("args", List("client #"+clientNum, n))
               println("Got response "+response2)
               Thread sleep 1000
             }

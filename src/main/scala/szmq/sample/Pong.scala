@@ -14,11 +14,11 @@ object Pong extends Application {
 
   class PongHandler(val n: Int) extends RPCHandler with BSONSerializer {
     serve {
-      case MethodCall("Ping", _) => { Reply("Pong") }
-      case MethodCall("Args", List(a, b)) => {
+      case MethodCall("ping", _) => Reply("Pong")
+      case MethodCall("args", List(a, b)) => {
         println("# %s Got args: %s, %s" format (n, a, b))
         Thread.sleep(1000)
-        Reply("Args: %s, %s" format (a, b))
+        Reply("args: %s, %s" format (a, b))
       }
     }
   }

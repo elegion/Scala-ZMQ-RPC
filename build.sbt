@@ -1,12 +1,18 @@
 name := "Scala ZMQ utils and RPC"
 
-version := "1.0"
+version := "1.0-SNAPSHOT"
 
-resolvers += "repo.novus rels" at "http://repo.novus.com/releases/"
+resolvers ++= Seq(
+  "repo.novus rels" at "http://repo.novus.com/releases/",
+  "repo.novus snaps" at "http://repo.novus.com/snapshots/",
+  "Twitter Maven Repo" at "http://maven.twttr.com/"
+)
 
-resolvers += "repo.novus snaps" at "http://repo.novus.com/snapshots/"
-
-libraryDependencies += "com.novus" %% "salat-core" % "0.0.7" 
+libraryDependencies ++= Seq(
+  "com.novus" %% "salat-core" % "0.0.7",
+  "com.twitter" % "util" % "1.10.1",
+  "com.twitter" % "ostrich" % "4.7.2"
+)
 
 
 

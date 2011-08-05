@@ -38,9 +38,11 @@ object Util {
     rep(context,endpoint)(loopHandler)
   }
 
-  def thread(block: => Any) {
-    new Thread() {
+  def thread(block: => Any) = {
+    val thread = new Thread() {
       override def run() { block }
-    }.start()
+    }
+    thread.start()
+    thread
   }
 }

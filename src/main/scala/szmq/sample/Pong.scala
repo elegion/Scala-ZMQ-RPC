@@ -10,7 +10,7 @@ import   rpc.server._
  */
 
 object Pong extends Application {
-  val workerNum = 50
+  val workerNum = 1
 
   class PongHandler(val n: Int) extends RPCHandler with BSONSerializer {
     serve {
@@ -23,9 +23,14 @@ object Pong extends Application {
     }
   }
 
-  val queue = new RPCQueue().start(BindTo("tcp://*:9999"))
+  val queue = new RPCQueue(BindTo("tcp://*:9999"))
+  queue.start()
 
   1 to workerNum foreach {n =>
     queue.addWorker(new PongHandler(n))
   }
+
+  readLine()
+  print("Stopping...")
+  queue.shutdown()
 }

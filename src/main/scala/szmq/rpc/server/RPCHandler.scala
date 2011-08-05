@@ -1,7 +1,7 @@
 package szmq.rpc.server
 
 import szmq.rpc._
-import org.zeromq.ZMQ.Socket
+import org.zeromq.ZMQ.{Context, Poller, Socket}
 
 /**
  * Author: Yuri Buyanov
@@ -14,6 +14,7 @@ object ErrorResponse {
 }
 
 abstract class RPCHandler { self: Serializer =>
+  var running = true
   type DispatchPF = PartialFunction[MethodCall, Reply]
   @volatile private var _dispatch: List[DispatchPF] = dispatchUnhandled::Nil
   def dispatchUnhandled: DispatchPF = {
@@ -23,20 +24,29 @@ abstract class RPCHandler { self: Serializer =>
     _dispatch ::= handler
   }
 
+  def stop() {
+    running = false
+  }
 
-  def handleSocket(socket: Socket) {
-    while(true) {
+  def handleSocket(ctx: Context, socket: Socket) {
+    val poller = ctx.poller()
+    poller.register(socket)
+    while(running) {
+      val polled = poller.poll(0)
+      if (polled > 0) {
       val data = socket.recv(0)
-      try {
-        val call = deserialize[MethodCall](data)
-        val response = _dispatch.find(_.isDefinedAt(call)).get.apply(call)
-        val responseData = serialize(response)
-        socket.send(responseData, 0)
-      } catch {
-        case e: Exception => ErrorResponse.malformedCall
+        try {
+          val call = deserialize[MethodCall](data)
+          val response = _dispatch.find(_.isDefinedAt(call)).get.apply(call)
+          val responseData = serialize(response)
+          socket.send(responseData, 0)
+        } catch {
+          case e: Exception => ErrorResponse.malformedCall
+        }
       }
     }
-
+    poller.unregister(socket)
+    socket.close()
   }
 
 }

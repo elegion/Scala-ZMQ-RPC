@@ -46,7 +46,7 @@ abstract class RPCHandler { self: Serializer =>
         stats foreach (_.incr("Messages recieved"))
         try {
           val call = deserialize[MethodCall](data)
-          stats foreach (_.setLabel("Current method", call.toString))
+          stats foreach (_.setLabel("#-"+id+" current method", call.toString))
           val response = _dispatch.find(_.isDefinedAt(call)).get.apply(call)
           val responseData = serialize(response)
           socket.send(responseData, 0)
@@ -67,6 +67,7 @@ abstract class RPCHandler { self: Serializer =>
   /**
    * Override to get stats
    */
+  def id = hashCode().toHexString
   def stats: Option[StatsCollection] = None
   def log = Logger.get(getClass.getName)
 }

@@ -29,7 +29,7 @@ class RPCQueue(
   val workerEP = ConnectTo(backendEPUri)
   var workerSet = scala.collection.mutable.Set.empty[RPCHandler]
   var queueThread: Option[Thread] = None
-  lazy val stats = Stats.make(id)
+  lazy val stats = Stats
   ServiceTracker.register(this)
 
   def start() {

@@ -16,7 +16,9 @@ object ErrorResponse {
 }
 
 abstract class RPCHandler { self: Serializer =>
-  type DispatchPF = PartialFunction[MethodCall, Reply]
+  type DispatchPF = PartialFunction[MethodCall, () => Reply]
+  implicit def reply2Callback(r: Reply): () => Reply = { () => r }
+
   @volatile private var _dispatch: List[DispatchPF] = dispatchUnhandled::Nil
   def dispatchUnhandled: DispatchPF = {
     case call: MethodCall => {
@@ -47,7 +49,7 @@ abstract class RPCHandler { self: Serializer =>
         try {
           val call = deserialize[MethodCall](data)
           stats foreach (_.setLabel("#-"+id+" current method", call.toString))
-          val response = _dispatch.find(_.isDefinedAt(call)).get.apply(call)
+          val response = _dispatch.find(_.isDefinedAt(call)).get.apply(call)()
           val responseData = serialize(response)
           socket.send(responseData, 0)
         } catch {

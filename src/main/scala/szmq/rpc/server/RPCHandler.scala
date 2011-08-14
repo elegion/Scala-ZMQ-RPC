@@ -42,11 +42,11 @@ abstract class RPCHandler { self: Serializer =>
     running = false
   }
 
-  def handleSocket(ctx: Context, socket: Socket) {
+  def handleSocket(ctx: Context, socket: Socket, pollTimeout = 0) {
     val poller = ctx.poller()
     poller.register(socket)
     while(running) {
-      val polled = poller.poll(0)
+      val polled = poller.poll(pollTimeout)
       if (polled > 0) {
         val data = socket.recv(0)
         stats foreach (_.incr("Messages recieved"))

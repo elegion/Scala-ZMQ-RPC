@@ -31,14 +31,16 @@ object ErrorReply {
   def apply(
     code: String,
     description: String,
-    argname: Option[String] = None
+    argname: Option[String] = None,
+    emotion: String = ":("
   ): ErrorReply =
-    ErrorReply(Error(code, description, argname))
+    ErrorReply(Error(code, description, argname, emotion))
 }
 
 
 case class Error(
   code: String,
   description: String,
-  argname: Option[String] = None
+  argname: Option[String] = None,
+  emotion: String = ":("
 )

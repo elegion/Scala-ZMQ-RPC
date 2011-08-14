@@ -13,10 +13,15 @@ import com.twitter.logging.Logger
 object ErrorResponse {
   def unknownMethod(call: MethodCall) = ErrorReply(
     code = "METHOD_UNKNOWN",
-    description = "Unknown method: "+call.name+" for args: "+call.args.mkString(", ")
+    description = "Unknown method: "+call.name+" for args: "+call.args.mkString(", "),
+    emotion = """¯\(°_o)/¯""" //I DUNNO
   )
 
-  def malformedCall = ErrorReply("MALFORMED_CALL", "Malformed method call")
+  def malformedCall = ErrorReply(
+    code = "MALFORMED_CALL",
+    description = "Malformed method call",
+    emotion = ":S"
+  )
 }
 
 abstract class RPCHandler { self: Serializer =>

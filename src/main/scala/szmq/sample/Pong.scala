@@ -9,13 +9,14 @@ import   rpc.server._
  * Date: 7/29/11 8:06 PM
  */
 
+//TODO: convert Ping-Ping sample to unit test, add malformed call, unknown method cases
 object Pong extends Application {
-  val workerNum = 1
+  val workerNum = 5
 
   class PongHandler(val n: Int) extends RPCHandler with BSONSerializer {
     serve {
-      case MethodCall("ping", _) => Reply("Pong")
-      case MethodCall("args", List(a, b)) => {
+      case MethodCall("ping", Nil) => Reply("Pong")
+      case MethodCall("args", a::b::Nil) => {
         println("# %s Got args: %s, %s" format (n, a, b))
         Thread.sleep(1000)
         Reply("args: %s, %s" format (a, b))

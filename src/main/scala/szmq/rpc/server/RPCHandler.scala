@@ -11,8 +11,12 @@ import com.twitter.logging.Logger
  */
 
 object ErrorResponse {
-  def unknownMethod(call: MethodCall) = Reply("", Some("Unknown method: "+call.name+" for this args"))
-  def malformedCall = Reply("", Some("Malformed method call"))
+  def unknownMethod(call: MethodCall) = ErrorReply(
+    code = "METHOD_UNKNOWN",
+    description = "Unknown method: "+call.name+" for args: "+call.args.mkString(", ")
+  )
+
+  def malformedCall = ErrorReply("MALFORMED_CALL", "Malformed method call")
 }
 
 abstract class RPCHandler { self: Serializer =>
@@ -48,9 +52,13 @@ abstract class RPCHandler { self: Serializer =>
         stats foreach (_.incr("Messages recieved"))
         try {
           val call = deserialize[MethodCall](data)
-          stats foreach (_.setLabel("#-"+id+" current method", call.toString))
           val response = _dispatch.find(_.isDefinedAt(call)).get.apply(call)()
-          val responseData = serialize(response)
+
+          //cannot serialize child class as Reply
+          val responseData = response match {
+            case v: ValueReply => serialize(v)
+            case e: ErrorReply => serialize(e)
+          }
           socket.send(responseData, 0)
         } catch {
           case e: Exception => {
@@ -59,7 +67,6 @@ abstract class RPCHandler { self: Serializer =>
             ErrorResponse.malformedCall
           }
         }
-        stats foreach (_.clearLabel("Current method"))
       }
     }
     poller.unregister(socket)

@@ -19,10 +19,10 @@ Server example:
                           //(designed to work only with case classes for now to keep things simple
                           //and be compatible with salat)
       {
-        //serve takes PartialFunction[MethodCall, Reply]
+        //serve takes PartialFunction[MethodCall, () => Reply] (or simply [..., Reply]
         serve {
-          case MethodCall("ping", _) => Reply("Pong")
-          case MethodCall("args", List(a, b)) => {
+          case MethodCall("ping", Nil) => Reply("Pong")
+          case MethodCall("args", a::b::Nil) => {
             println("# %s Got args: %s, %s" format (n, a, b))
             Thread.sleep(1000)
             Reply("Args: %s, %s" format (a, b))
@@ -31,7 +31,8 @@ Server example:
       }
 
       //start frontend dispatcher
-      val queue = new RPCQueue().start(BindTo("tcp://*:9999"))
+      val queue = new RPCQueue(BindTo("tcp://*:9999"))
+      queue.start()
 
       //add rpc workers
       1 to workerNum foreach {n =>
@@ -70,7 +71,7 @@ Client example:
                 val client = new Client(socket) with BSONSerializer
                 1 to count foreach { n =>
                   println("Calling args "+n)
-                  val response2 = client.callMethod("args", List("client #"+clientNum, n))
+                  val response2 = client.callMethod("args", "client #"+clientNum, n)
                   println("Got response "+response2)
                   Thread sleep 1000
                 }

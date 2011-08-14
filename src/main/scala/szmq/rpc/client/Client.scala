@@ -10,11 +10,14 @@ import org.zeromq.ZMQ.Socket
  */
 
 abstract class Client(socket: Socket) extends Serializer {
-  def callMethod(name: String, args: List[Any]): Any = {
-    val mc = MethodCall(name, args)
+  def callMethod(name: String, args: Any*): Any = {
+    val mc = MethodCall(name, args.toList)
     socket.send(serialize(mc), 0)
     val reply = deserialize[Reply](socket.recv(0))
-    reply.error map {err: String => throw new RPCError(err)} getOrElse(reply.value)
+    reply match {
+      case ValueReply(value) => value
+      case ErrorReply(errs @_*) => throw new RPCError(errs: _*)
+    }
   }
 
 }

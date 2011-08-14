@@ -16,7 +16,7 @@ import java.lang.Thread
 object Ping {
   def main(args: Array[String]) {
     inContext() { context: Context =>
-      val clientsNum = 200
+      val clientsNum = 10
       val count = args.headOption map (_.toInt) getOrElse (10)
 
       1 to clientsNum foreach { clientNum =>
@@ -27,8 +27,8 @@ object Ping {
             val client = new Client(socket) with BSONSerializer
             1 to count foreach { n =>
               println("Calling args "+n)
-              val response2 = client.callMethod("args", List("client #"+clientNum, n))
-              println("Got response "+response2)
+              val response = client.callMethod("args", "client #"+clientNum, n)
+              println("Got response "+response)
               Thread sleep 1000
             }
           }

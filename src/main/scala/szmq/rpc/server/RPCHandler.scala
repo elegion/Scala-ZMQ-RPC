@@ -42,7 +42,7 @@ abstract class RPCHandler { self: Serializer =>
     running = false
   }
 
-  def handleSocket(ctx: Context, socket: Socket, pollTimeout = 0) {
+  def handleSocket(ctx: Context, socket: Socket, pollTimeout: Int = 0) {
     val poller = ctx.poller()
     poller.register(socket)
     while(running) {

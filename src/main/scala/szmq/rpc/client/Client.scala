@@ -16,7 +16,7 @@ abstract class Client(socket: Socket) extends Serializer {
     val reply = deserialize[Reply](socket.recv(0))
     reply match {
       case ValueReply(value) => value
-      case ErrorReply(errs @_*) => throw new RPCError(errs: _*)
+      case ErrorReply(errs) => throw new RPCError(errs: _*)
     }
   }
 

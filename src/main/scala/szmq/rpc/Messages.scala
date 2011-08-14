@@ -22,9 +22,12 @@ object Reply {
 }
 
 case class ValueReply(value: Any) extends Reply
-case class ErrorReply(errors: Error*) extends Reply
+case class ErrorReply(errors: List[Error]) extends Reply
 
 object ErrorReply {
+  //I know about varargs, but salat deserialization doesn't seem to support them
+  def apply(error: Error): ErrorReply = ErrorReply(List(error))
+
   def apply(
     code: String,
     description: String,

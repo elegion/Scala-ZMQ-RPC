@@ -33,7 +33,7 @@ trait BSONSerializer extends Serializer {
     //Ugly, but looks like salat isn't smart enough to detect proper subclass of T
     val gr =
       if (m.erasure == classOf[Reply])           //Reply
-        if (obj.getAs[String]("code").isDefined)  //ErrorReply
+        if (obj.getAs[String]("errors").isDefined)  //ErrorReply
           grater[ErrorReply]
         else                                      //ValueReply
           grater[ValueReply]

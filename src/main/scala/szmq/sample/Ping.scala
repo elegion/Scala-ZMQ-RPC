@@ -27,7 +27,7 @@ object Ping {
             val client = new Client(socket) with BSONSerializer
             1 to count foreach { n =>
               println("Calling args "+n)
-              val response = client.callMethod("args", "client #"+clientNum, n)
+              val response = client.callMethod("aargs", "client #"+clientNum, n)
               println("Got response "+response)
               Thread sleep 1000
             }

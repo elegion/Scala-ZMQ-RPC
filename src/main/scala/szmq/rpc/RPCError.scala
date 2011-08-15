@@ -5,4 +5,4 @@ package szmq.rpc
  * Date: 8/1/11 11:55 AM
  */
 
-class RPCError(errors: Error*) extends Exception(errors.map(_.code).mkString(", "))
+class RPCError(val errors: Error*) extends Exception(errors.map(_.code).mkString(", "))

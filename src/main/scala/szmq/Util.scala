@@ -14,17 +14,24 @@ object Util {
     block(c)
   }
 
-  def inContext(config: Config = DefaultConfig)(block: Context => Any) = {
+  def inContext(config: Config = DefaultConfig) = {
     val zmqcontext = context(config.ioThreads)
-    withContext(zmqcontext)(block)
+    try {
+      withContext(zmqcontext) _
+    } finally {
+      try {
+        zmqcontext.term()
+      } catch {
+        case e => e.printStackTrace()
+      }
+    }
   }
 
   private def inSocket(sockType: Int)(context: Context, endpoint: Endpoint)(handler: Socket => Any) = {
     val socket = context.socket(sockType)
     try {
       endpoint plug socket
-      val handlerResult = handler(socket)
-      handlerResult
+      handler(socket)
     } finally {
       try {
         socket.close()

@@ -2,7 +2,6 @@ package szmq
 
 import org.zeromq._
 import org.zeromq.ZMQ._
-import szmq.DefaultConfig
 import java.lang.Thread
 
 /**
@@ -28,10 +27,10 @@ object Util {
     handlerResult
   }
 
-  def rep(context: Context, endpoint: Endpoint)(handler: Socket => Any) = inSocket(REP)(context, endpoint)(handler)
-  def req(context: Context, endpoint: Endpoint)(handler: Socket => Any) = inSocket(REQ)(context, endpoint)(handler)
-  def router(context: Context, endpoint: Endpoint)(handler: Socket => Any) = inSocket(XREP)(context, endpoint)(handler)
-  def dealer(context: Context, endpoint: Endpoint)(handler: Socket => Any) = inSocket(XREQ)(context, endpoint)(handler)
+  def rep = inSocket(REP) _
+  def req = inSocket(REQ) _
+  def router = inSocket(XREP) _
+  def dealer = inSocket(XREQ) _
 
   def repLoop(context: Context, endpoint: Endpoint)(handler: Socket => Any) {
     val loopHandler = { s: Socket => while (true) { handler(s) }}

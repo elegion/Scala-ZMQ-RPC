@@ -55,11 +55,12 @@ Client example:
     object Ping {
       def main(args: Array[String]) {
         inContext() { context: Context =>
-          val clientsNum = 200
+          val clientsNum = 10
           val count = args.headOption map (_.toInt) getOrElse (10)
 
           //create a bunch of client threads
-          1 to clientsNum foreach { clientNum =>
+          1 to clientsNum map { clientNum =>
+            Thread sleep 100
 
             //shorthand for new Thread(){ override def run() { ... } }.start()
             thread {
@@ -78,8 +79,8 @@ Client example:
               }
               println("done in "+(System.currentTimeMillis() - start) + "ms")
             }
-            Thread sleep 100
-          }
+          } foreach (_.join())  //inContext terminates context after code block, so wait
+                                //until all client threads are finished
         }
       }
     }

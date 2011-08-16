@@ -14,10 +14,10 @@ object Util {
     block(c)
   }
 
-  def inContext(config: Config = DefaultConfig) = {
+  def inContext(config: Config = DefaultConfig)(block: Context => Any) = {
     val zmqcontext = context(config.ioThreads)
     try {
-      withContext(zmqcontext) _
+      withContext(zmqcontext)(block)
     } finally {
       try {
         zmqcontext.term()

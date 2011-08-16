@@ -19,7 +19,8 @@ object Ping {
       val clientsNum = 10
       val count = args.headOption map (_.toInt) getOrElse (10)
 
-      1 to clientsNum foreach { clientNum =>
+      1 to clientsNum map { clientNum =>
+        Thread sleep 100
         thread {
           val start = System currentTimeMillis()
           req(context, ConnectTo("tcp://localhost:9999")) { socket =>
@@ -27,15 +28,14 @@ object Ping {
             val client = new Client(socket) with BSONSerializer
             1 to count foreach { n =>
               println("Calling args "+n)
-              val response = client.callMethod("aargs", "client #"+clientNum, n)
+              val response = client.callMethod("args", "client #"+clientNum, n)
               println("Got response "+response)
               Thread sleep 1000
             }
           }
           println("done in "+(System.currentTimeMillis() - start) + "ms")
         }
-        Thread sleep 100
-      }
+      } foreach (_.join())
     }
   }
 }

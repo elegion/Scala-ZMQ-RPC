@@ -11,7 +11,8 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "com.novus" %% "salat-core" % "0.0.7",
   "com.twitter" % "util" % "1.10.1",
-  "com.twitter" % "ostrich" % "4.7.2"
+  "com.twitter" % "ostrich" % "4.7.2",
+  "org.scalatest" %% "scalatest" % "1.5.1" % "test"
 )
 
 

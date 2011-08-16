@@ -25,11 +25,13 @@ object Util {
       endpoint plug socket
       val handlerResult = handler(socket)
       handlerResult
-    } finally try
+    } finally {
+      try {
         socket.close()
-      catch {
+      } catch {
         case e => e.printStackTrace()
       }
+    }
   }
 
   def rep = inSocket(REP) _

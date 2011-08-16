@@ -1,28 +1,27 @@
 package szmq.rpc
 
 import client.Client
-import org.scalatest.{BeforeAndAfterEach, Suite}
 import szmq.Util._
 import org.zeromq.ZMQ.Context
 import szmq.ConnectTo._
 import szmq.{BindTo, ConnectTo}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 
 /**
  * Author: Yuri Buyanov
  * Date: 8/16/11 11:37 PM
  */
 
-class PingPongSuite extends Suite with BeforeAndAfterEach {
+class PingPongSuite extends Suite with BeforeAndAfterAll {
 
   var pong = new PongServer(BindTo("tcp://*:9999"))
 
-  override protected def beforeEach() {
-    //to prevent parallel test execution
-    //(i know, i can configure that in buildfile :)
+  override protected def beforeAll() {
+    //todo: deal with parallel test execution in scalatest
     pong.start()
   }
 
-  override protected def afterEach() {
+  override protected def afterAll() {
     pong.stop()
   }
 

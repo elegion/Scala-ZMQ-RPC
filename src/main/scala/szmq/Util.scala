@@ -21,10 +21,15 @@ object Util {
 
   private def inSocket(sockType: Int)(context: Context, endpoint: Endpoint)(handler: Socket => Any) = {
     val socket = context.socket(sockType)
-    endpoint plug socket
-    val handlerResult = handler(socket)
-    socket.close()
-    handlerResult
+    try {
+      endpoint plug socket
+      val handlerResult = handler(socket)
+      handlerResult
+    } finally try
+        socket.close()
+      catch {
+        case e => e.printStackTrace()
+      }
   }
 
   def rep = inSocket(REP) _

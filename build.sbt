@@ -1,6 +1,6 @@
 name := "Scala ZMQ utils and RPC"
 
-version := "1.0-SNAPSHOT"
+version := "0.1-SNAPSHOT"
 
 resolvers ++= Seq(
   "repo.novus rels" at "http://repo.novus.com/releases/",

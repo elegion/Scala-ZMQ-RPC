@@ -2,9 +2,9 @@ package szmq.rpc.server
 
 import szmq.rpc._
 import org.zeromq.ZMQ.{Context, Poller, Socket}
-import com.twitter.ostrich.stats.StatsCollection
 import com.twitter.logging.Logger
 import szmq.Loggable
+import com.twitter.ostrich.stats.{Stats, StatsCollection}
 
 /**
  * Author: Yuri Buyanov
@@ -60,6 +60,8 @@ abstract class RPCHandler extends Loggable { self: Serializer =>
     catch {
       case e: Throwable => {
         log.error(e, "Exception has occurred during request processing.")
+        stats.foreach(_.incr("EXCEPTION responses by %s" format e.getClass.getSimpleName))
+        Stats.foreach(_.incr("EXCEPTION responses total"))
         ErrorResponse.exception(e)
       }
     }

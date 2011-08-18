@@ -21,9 +21,7 @@ import com.twitter.logging.Logger
 class RPCQueue(
                 val frontendEP: Endpoint,
                 val id: String = getClass.getName,
-                val ctx: Context = context(DefaultConfig.ioThreads)) extends Service {
-
-  val log = Logger.get(id)
+                val ctx: Context = context(DefaultConfig.ioThreads)) extends Service with Loggable {
   def backendEPUri = "inproc://"+id
   val backendEP = BindTo(backendEPUri)
   val workerEP = ConnectTo(backendEPUri)

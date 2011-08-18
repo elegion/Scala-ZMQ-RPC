@@ -52,7 +52,6 @@ class RPCQueue(
     }
   }
 
-
   def shutdown() {
     log.debug("Shutting down")
 
@@ -60,6 +59,9 @@ class RPCQueue(
       workerSet foreach (_.stop())
     }
     queueThread foreach (_.interrupt())
+
+    //wait for queue thread to stop
+    queueThread foreach (_.join()) //todo: the same for worker threads
     queueThread = None
   }
 

@@ -4,6 +4,7 @@ import szmq.rpc._
 import org.zeromq.ZMQ.{Context, Poller, Socket}
 import com.twitter.ostrich.stats.StatsCollection
 import com.twitter.logging.Logger
+import szmq.Loggable
 
 /**
  * Author: Yuri Buyanov
@@ -22,9 +23,15 @@ object ErrorResponse {
     description = "Malformed method call",
     emotion = ":S"
   )
+
+  def exception(e: Throwable) = ErrorReply(
+    code = "EXCEPTION",
+    description = e.getMessage,
+    emotion = "=:-E"
+  )
 }
 
-abstract class RPCHandler { self: Serializer =>
+abstract class RPCHandler extends Loggable { self: Serializer =>
   type DispatchPF = PartialFunction[MethodCall, () => Reply]
   implicit def reply2Callback(r: Reply): () => Reply = { () => r }
 
@@ -47,6 +54,18 @@ abstract class RPCHandler { self: Serializer =>
     running = false
   }
 
+  def safeCall(block: => Reply) = {
+    try
+      block()
+    catch {
+      case e: Throwable => {
+        log.error(e, "Exception has occurred during request processing.")
+        ErrorResponse.exception(e)
+      }
+    }
+  }
+
+
   def handleSocket(ctx: Context, socket: Socket, pollTimeout: Int = 0) {
     val poller = ctx.poller()
     poller.register(socket)
@@ -55,16 +74,12 @@ abstract class RPCHandler { self: Serializer =>
       if (polled > 0) {
         val data = socket.recv(0)
         stats foreach (_.incr("Messages recieved"))
-        try {
+        val response = try {
           val call = deserialize[MethodCall](data)
-          val response = _dispatch.find(_.isDefinedAt(call)).get.apply(call)()
-
-          //cannot serialize child class as Reply
-          val responseData = response match {
-            case v: ValueReply => serialize(v)
-            case e: ErrorReply => serialize(e)
+          safeCall {
+            _dispatch.find(_.isDefinedAt(call)).get.apply(call)()
           }
-          socket.send(responseData, 0)
+          //cannot serialize child class as Reply :(
         } catch {
           case e: Exception => {
             stats foreach (_.incr("Malformed calls"))
@@ -72,6 +87,14 @@ abstract class RPCHandler { self: Serializer =>
             ErrorResponse.malformedCall
           }
         }
+
+        val responseData = response match {
+          case v: ValueReply => serialize(v)
+          case e: ErrorReply => serialize(e)
+        }
+
+        socket.send(responseData, 0)
+
       }
     }
     poller.unregister(socket)
@@ -83,5 +106,4 @@ abstract class RPCHandler { self: Serializer =>
    */
   def id = hashCode().toHexString
   def stats: Option[StatsCollection] = None
-  def log = Logger.get(getClass.getName)
 }

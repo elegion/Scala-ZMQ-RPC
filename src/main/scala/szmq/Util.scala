@@ -3,6 +3,7 @@ package szmq
 import org.zeromq._
 import org.zeromq.ZMQ._
 import java.lang.Thread
+import com.twitter.logging.Logger
 
 /**
  * Author: Yuri Buyanov
@@ -58,4 +59,8 @@ object Util {
     thread.start()
     thread
   }
+}
+
+trait Loggable {
+  def log = Logger.get(this.getClass)
 }

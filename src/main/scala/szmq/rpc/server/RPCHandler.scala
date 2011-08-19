@@ -61,7 +61,7 @@ abstract class RPCHandler extends Loggable { self: Serializer =>
       case e: Throwable => {
         log.error(e, "Exception has occurred during request processing.")
         stats.foreach(_.incr("EXCEPTION responses by %s" format e.getClass.getSimpleName))
-        Stats.foreach(_.incr("EXCEPTION responses total"))
+        stats.foreach(_.incr("EXCEPTION responses total"))
         ErrorResponse.exception(e)
       }
     }

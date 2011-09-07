@@ -32,14 +32,14 @@ object ErrorResponse {
 }
 
 abstract class RPCHandler extends Loggable { self: Serializer =>
-  type DispatchPF = PartialFunction[MethodCall, () => Reply]
-  implicit def reply2Callback(r: Reply): () => Reply = { () => r }
+  type DispatchPF = PartialFunction[MethodCall, Reply]
+  //implicit def reply2Callback(r: Reply): () => Reply = { () => r }
 
   @volatile private var _dispatch: List[DispatchPF] = dispatchUnhandled::Nil
   def dispatchUnhandled: DispatchPF = {
     case call: MethodCall => {
       stats foreach (_.incr("Unhandled call (total)"))
-      stats foreach (_.incr("Unhandled calls ("+call.name)+")")
+      stats foreach (_.incr("Unhandled calls (%s)".format(call.name)))
       log.warning("Unhandled method call: %s", call.toString)
       ErrorResponse.unknownMethod(call)
     }
@@ -56,7 +56,7 @@ abstract class RPCHandler extends Loggable { self: Serializer =>
 
   def safeCall(block: => Reply) = {
     try
-      block()
+      block
     catch {
       case e: Throwable => {
         log.error(e, "Exception has occurred during request processing.")
@@ -79,7 +79,7 @@ abstract class RPCHandler extends Loggable { self: Serializer =>
         val response = try {
           val call = deserialize[MethodCall](data)
           safeCall {
-            _dispatch.find(_.isDefinedAt(call)).get.apply(call)()
+            _dispatch.find(_.isDefinedAt(call)).get.apply(call)
           }
           //cannot serialize child class as Reply :(
         } catch {

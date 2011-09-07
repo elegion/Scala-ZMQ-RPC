@@ -20,8 +20,9 @@ import com.twitter.logging.Logger
 //sockets open/close on start/shutdown
 class RPCQueue(
                 val frontendEP: Endpoint,
-                val id: String = getClass.getName,
-                val ctx: Context = context(DefaultConfig.ioThreads)) extends Service with Loggable {
+                val id: String = System.currentTimeMillis.toString,
+                val ctx: Context = context(DefaultConfig.ioThreads),
+                val workerPollTimeout: Int = 100) extends Service with Loggable {
   def backendEPUri = "inproc://"+id
   val backendEP = BindTo(backendEPUri)
   val workerEP = ConnectTo(backendEPUri)
@@ -77,7 +78,7 @@ class RPCQueue(
     log.debug("Starting worker: %s", handler.toString)
     thread {
       rep(ctx, workerEP) { s: Socket =>
-        handler.handleSocket(ctx, s)
+        handler.handleSocket(ctx, s, workerPollTimeout)
       }
     }
   }
